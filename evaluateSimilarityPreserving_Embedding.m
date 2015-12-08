@@ -54,7 +54,6 @@ function [NMI_avg, NMI_std, NMI_CI, rand_avg, rand_std, rand_CI, FMeasure_avg, F
         K = Kernel2(A', A', KernelInfo);
     end
 
-    %[cluster_labels, ~,~] = kernelkmeans(K, num_clusters);
     for j = 1: num_repeat
         fprintf('j = %d\n', j);
         for i = 1: length(m_val)
@@ -66,14 +65,6 @@ function [NMI_avg, NMI_std, NMI_CI, rand_avg, rand_std, rand_CI, FMeasure_avg, F
             else
                 W = kernel_SimilarityPreserving_Embedding(K, m);
             end    
-
-            %[U, Sigma, V] = svds(A, m);
-            %W = U * Sigma * V';
-
-            %[~, score] = pca(A', 'NumComponents', m);
-            %W = score';
-
-            %K_tilde = W'*W;
             cluster_labels = kmeans_(W', 'random', num_clusters);
             run_time(j, i) = toc;
             [rand(j, i), FMeasure(j, i), NMI_val(j, i)] = clusterEvaluator(cluster_labels , gnd );
