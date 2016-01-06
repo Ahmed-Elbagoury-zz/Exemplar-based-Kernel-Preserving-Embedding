@@ -1,0 +1,66 @@
+function [U, S, V] = StochasticSVD(A, k, q, p)
+
+% Stochastic SVD
+% Author: Ahmed K. Farahat (afarahat@uwaterloo.ca)
+% Date: July 20, 2012
+
+% This is a modified version of the code written by Benjamin J. Sapp [3].
+% Sapp's code appears at www.seas.upenn.edu/~bensapp/papers/wpe2.pptx
+
+% This code implements the Algorithm in Section 4.3 of [2].
+
+% References:
+% 1-N. Halko, P. G. Martinsson, and J. A. Tropp. 2011. Finding Structure 
+%   with Randomness: Probabilistic Algorithms for Constructing Approximate 
+%   Matrix Decompositions. SIAM Rev. 53, 2 (May 2011), 217-288.
+% 2-N. Halko. 2012. Randomized methods for computing low-rank approximations
+%   of matrices. Ph.D. Dissertation. University of Colorado
+% 3-Benjamin Sapp. 2011. Randomized Algorithms for Low-Rank Matrix 
+%   Decomposition. Written Preliminary Examination II. May 2011
+
+% Inputs:
+%   A: The data matrix.
+%   k: The number of singular values and vectors to be calculated.
+%   q: The number of iterations of the power iteration.
+%   p: The oversampling parameter.
+
+% Outputs:
+%   U: The left singular vectors.
+%   S: The singular values.
+%   V: The right singular vectors.
+
+if ~exist('q', 'var')
+    q = 2;  % Number of iterations
+end
+if ~exist('p', 'var')
+    p = 10;  % Oversampling parameter
+end
+
+[m, n] = size(A);
+
+bToTranspose = false;
+if(m < n)
+    A = A';
+    bToTranspose = true;
+end
+d = min(m, n);
+
+Omega = randn(d, k+p);
+Y = A*Omega;
+[Q, R] = qr(Y, 0);
+for i=1:q
+    Y = A'*Q;   
+    Y = A*Y;
+    [Q, R] = qr(Y, 0);
+end
+% Embedding of A's cols into the subspace of Q
+W = Q'*A;
+
+[U_, S, V] = svds(W, k);
+U = Q*U_;
+
+if bToTranspose
+    T = V;
+    V = U;
+    U = T;
+end
