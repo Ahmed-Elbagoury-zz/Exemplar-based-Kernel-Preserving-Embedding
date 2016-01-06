@@ -1,0 +1,27 @@
+function P = reduceMatrix(S_tilde)
+    P = zeros(size(S_tilde));
+    I = eye(size(S_tilde));
+    S_new = S_tilde;
+    for i = 1 : size(S_tilde, 2) %iterate through each row
+        div = sqrt(abs(S_new(i, i)));
+        S_new(i, :) = S_new(i, :) / div;
+        S_new(:, i) = S_new(:, i) / div;
+        I(i, :) = I(i, :) /div;
+        for j = i+1:size(S_tilde, 1)    %iterate through rows below the row i
+            mult = -1 * S_new(j, i) / S_new(i, i);
+            S_new (j, :) = mult * S_new(i, :) + S_new(j, :);
+            S_new (:, j) = mult * S_new(:, i) + S_new(:, j);
+            
+            %Apply the same operations on the identity matrix
+            I(j, :) = mult * I(i, :) + I(j, :);
+        end
+    end
+    P = I';
+    %{
+    for i = 1: size(S_tilde, 2)
+       div = abs(S_new(i, i));
+       S_new(i, :) = S_new(i, :) / div;
+       I(i, :) = I(i, :) / div;
+    end
+    %}
+end
